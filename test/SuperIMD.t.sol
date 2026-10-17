@@ -2,6 +2,7 @@
 pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
@@ -10,6 +11,7 @@ import {DeploySuperIMD} from "../script/Deploy.s.sol";
 
 /// @notice Behavioural tests for Super IMD: metadata, the one-time mint, transfers, allowances,
 /// permit, and the absence of any privileged power over supply or balances.
+/// forge-config: default.fuzz.runs = 1000
 contract SuperIMDTest is Test {
     uint256 internal constant EXPECTED_SUPPLY = 1_000_000_000 ether;
 
@@ -54,10 +56,17 @@ contract SuperIMDTest is Test {
     }
 
     function test_constructorEmitsSingleMintTransfer() public {
-        vm.expectEmit(true, true, true, true);
-        emit Transfer(address(0), alice, EXPECTED_SUPPLY);
+        vm.recordLogs();
         vm.prank(alice);
         SuperIMD fresh = new SuperIMD();
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        assertEq(logs.length, 1, "constructor must emit exactly one mint");
+        assertEq(logs[0].emitter, address(fresh));
+        assertEq(logs[0].topics.length, 3);
+        assertEq(logs[0].topics[0], keccak256("Transfer(address,address,uint256)"));
+        assertEq(logs[0].topics[1], bytes32(0));
+        assertEq(logs[0].topics[2], bytes32(uint256(uint160(alice))));
+        assertEq(abi.decode(logs[0].data, (uint256)), EXPECTED_SUPPLY);
         assertEq(fresh.balanceOf(alice), EXPECTED_SUPPLY);
         assertEq(fresh.totalSupply(), EXPECTED_SUPPLY);
     }
@@ -130,7 +139,7 @@ contract SuperIMDTest is Test {
     }
 
     function testFuzz_transferConservesSupply(address to, uint256 amount) public {
-        vm.assume(to != address(0));
+        to = address(uint160(bound(uint256(uint160(to)), 1, type(uint160).max)));
         amount = bound(amount, 0, EXPECTED_SUPPLY);
         vm.prank(deployer);
         assertTrue(token.transfer(to, amount));
