@@ -1,0 +1,24 @@
+{
+  "kind": "custom_token",
+  "token": {
+    "contract": "SuperIMD",
+    "name": "Super IMD",
+    "symbol": "SIMD",
+    "decimals": 18,
+    "constructorArgs": [],
+    "totalSupply": "1000000000000000000000000000"
+  },
+  "contracts": [],
+  "pool": {
+    "pairedCurrency": "0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7",
+    "fee": 12500,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336"
+  },
+  "economics": {
+    "poolBps": 8000,
+    "initialMarketCapWei": "25000000000000000000000",
+    "remainderTo": "0x612a9bb008e16ef2d24f41dae9fc661831d93367"
+  },
+  "notes": "SuperIMD is a fixed-supply ERC-20 with ERC-2612 permit. Its constructor takes no arguments and mints all 1,000,000,000 SIMD with 18 decimals once to msg.sender. It has no owner, further minting, transfer fees, pause or blocklist. No application contracts are deployed. pool.initialPrice is provenance only; the deployer derives the opening price from the initial market cap and total supply."
+}
