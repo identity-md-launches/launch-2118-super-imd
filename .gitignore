@@ -1,0 +1,11 @@
+# Foundry build outputs
+out/
+cache/
+broadcast/
+
+# Local scratch space (deleted before verification anyway)
+test/scratch/
+
+# Secrets never belong here
+.env
+.env.*
